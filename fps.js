@@ -3,6 +3,7 @@
 			import Stats from 'three/addons/libs/stats.module.js';
 
 			import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+			import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 			import { Octree } from 'three/addons/math/Octree.js';
 			import { OctreeHelper } from 'three/addons/helpers/OctreeHelper.js';
@@ -39,6 +40,8 @@
 			directionalLight.shadow.bias = - 0.00006;
 			scene.add( directionalLight );
 
+			
+
 			const container = document.getElementById( 'container' );
 
 			const renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -54,6 +57,7 @@
 			stats.domElement.style.position = 'absolute';
 			stats.domElement.style.top = '0px';
 			container.appendChild( stats.domElement );
+
 
 			const GRAVITY = 30;
 
@@ -227,30 +231,19 @@
 
 			}
 
-			const loader = new GLTFLoader().setPath( './models/gltf/' );
-
-			loader.load( 'collision-world.glb', ( gltf ) => {
-
-				scene.add( gltf.scene );
-
-				worldOctree.fromGraphNode( gltf.scene );
-
-				gltf.scene.traverse( child => {
-
-					if ( child.isMesh ) {
-
-						child.castShadow = true;
-						child.receiveShadow = true;
-
-						if ( child.material.map ) {
-
-							child.material.map.anisotropy = 4;
-
-						}
-
-					}
-
-				} );
+			const loader = new OBJLoader();
+			loader.load(
+				'models/monster.obj',
+				function ( object ) {
+					scene.add( object  );
+				},
+				function ( xhr ) {
+					console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+				},
+				function ( error ) {
+					console.log( 'An error happened' );
+				}
+			);
 
 				const helper = new OctreeHelper( worldOctree );
 				helper.visible = false;
@@ -263,8 +256,6 @@
 						helper.visible = value;
 
 					} );
-			
-			} );
 
 			function teleportPlayerIfOob() {
 
